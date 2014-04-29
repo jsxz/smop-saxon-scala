@@ -21,8 +21,28 @@ class SaxonSpec extends Specification {
       val xp = xpath"/doc/el[@at='$i']"
       xp(doc).head.toStr === xml"""<el at="2"/>""".toStr
     }
-    "handle namespaces" in {
-      failure
-    }.pendingUntilFixed
+    "support namespace registration" in {
+      implicitly[NameSpaces] === new NameSpaces(Map())
+      implicit val someNSs = NameSpaces("foo" -> "urn:foo", "bar" -> "http://bar.com/")
+      implicitly[NameSpaces].toString === "NameSpaces(foo -> urn:foo, bar -> http://bar.com/)"
+
+      {
+        implicit val moreNSs = NameSpaces("baz" -> "urn:baz")
+        moreNSs.toString === "NameSpaces(foo -> urn:foo, bar -> http://bar.com/, baz -> urn:baz)"
+      }
+    }
+    "Use registered namespaces in xpath" in {
+      val doc = xml"""<root xmlns="urn:foo">42</root>"""
+      val xp1 = xpath"/root"
+      xp1(doc) should beEmpty
+      implicit val myNSs = NameSpaces("foo" -> "urn:foo")
+      val xp2 = xpath"/foo:root"
+      val result = xp2(doc)
+      result.head.toStr === """<root xmlns="urn:foo">42</root>"""
+      val xp3 = xpath"number(/foo:root)"
+      val answer = xp3(doc)
+      answer.head.isAtomicValue should beTrue
+      answer.head.getStringValue === "42"
+    }
   }
 }

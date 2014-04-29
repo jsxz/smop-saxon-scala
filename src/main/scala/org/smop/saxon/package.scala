@@ -27,7 +27,7 @@ package object saxon {
         buildString(parts.tail, params.tail, result)
     }
 
-    def xpath(params: Any*)(implicit saxonContext: SaxonContext): XPath = {
+    def xpath(params: Any*)(implicit saxonContext: SaxonContext, nss: NameSpaces): XPath = {
       val sb = new StringBuffer
       buildString(stringContext.parts, params, sb)
       new XPath(sb.toString)
