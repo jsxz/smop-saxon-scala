@@ -44,5 +44,31 @@ class SaxonSpec extends Specification {
       answer.head.isAtomicValue should beTrue
       answer.head.getStringValue === "42"
     }
+    "Compare nodes" in {
+      val n1 = xml"""<foo xmlns:foofoo="urn:foofoo" bar="1" baz="2"/>"""
+      val n2 = xml"""<foo baz="2" bar='1'><!-- ignored --></foo>"""
+      val n3 = xml"""<foo baz="2" bar='3'></foo>"""
+      val testEq = XPath("deep-equal($a, $b)")
+      val answer = testEq(n1, Map("a" -> n1, "b" -> n2))
+      answer.head.isAtomicValue should beTrue
+      answer.head.getStringValue === "true"
+      val answer2 = testEq(n1, Map("a" -> n1, "b" -> n3))
+      answer2.head.isAtomicValue should beTrue
+      answer2.head.getStringValue === "false"
+    }
+    "Compare nodes Saxon-specific" in {
+      implicit val someNSs = NameSpaces("saxon" -> "http://saxon.sf.net/")
+      val n1 = xml"""<foo bar="1" baz="2"/>"""
+      val n2 = xml"""<foo baz="2" bar='1'></foo>"""
+      val n3 = xml"""<foo baz="2" bar='3'></foo>"""
+      // http://www.saxonica.com/documentation/functions/saxon/deep-equal.html
+      val testEq = XPath("saxon:deep-equal($a, $b, '?')")
+      val answer = testEq(n1, Map("a" -> n1, "b" -> n2))
+      answer.head.isAtomicValue should beTrue
+      answer.head.getStringValue === "true"
+      val answer2 = testEq(n1, Map("a" -> n1, "b" -> n3))
+      answer2.head.isAtomicValue should beTrue
+      answer2.head.getStringValue === "false"
+    }.pendingUntilFixed("Needs Saxon PE or EE")
   }
 }
