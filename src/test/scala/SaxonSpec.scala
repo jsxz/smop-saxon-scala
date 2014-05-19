@@ -49,7 +49,7 @@ class SaxonSpec extends Specification {
       val n2 = xml"""<foo baz="2" bar='1'><!-- ignored --></foo>"""
       val n3 = xml"""<foo baz="2" bar='3'></foo>"""
       val testEq = XPath("deep-equal($a, $b)")
-      val answer = testEq(n1, Map("a" -> n1, "b" -> n2))
+      val answer = testEq(n1, "a" -> n1, "b" -> n2)
       answer.head.isAtomicValue should beTrue
       answer.head.getStringValue === "true"
       val answer2 = testEq(n1, Map("a" -> n1, "b" -> n3))

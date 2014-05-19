@@ -8,6 +8,11 @@ class XPath(stringForm: String)(implicit saxonContext: SaxonContext, nss: NameSp
   nss.bindings.foreach {
     case (prefix, uri) => xpathCompiler.declareNamespace(prefix, uri)
   }
+
+  def apply(node:XdmNode, vars: (String, XdmItem)*): Traversable[XdmItem] = {
+    apply(node, vars.toMap)
+  }
+
   def apply(node: XdmNode, vars: Map[String, XdmItem] = Map.empty): Traversable[XdmItem] = {
     vars.foreach {
       case (name, value) => xpathCompiler.declareVariable(new QName(name))
