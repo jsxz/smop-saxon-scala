@@ -6,7 +6,7 @@ description := "Light Scala wrappers around the Saxon XSLT/XPath library"
 
 licenses += ("BSD Simplified", url("http://opensource.org/licenses/bsd-license"))
 
-scalaVersion := "2.11.0"
+scalaVersion := "2.10.4"
 
 crossScalaVersions := Seq("2.11.0", "2.10.4")
 
