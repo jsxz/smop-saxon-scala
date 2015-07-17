@@ -4,7 +4,15 @@ import net.sf.saxon.s9api.{XdmItem, XdmNode}
 import javax.xml.transform.stream.StreamSource
 import java.io.StringReader
 
+import scala.reflect.runtime.universe._
+
 package object saxon {
+
+  type XNode = XdmNode
+
+  trait Convert[A, B] {
+    def convert(a: A): B
+  }
 
   implicit class SaxonXmlString(stringContext: StringContext) {
     def xml(params: Any*)(implicit saxonContext: SaxonContext): XdmNode = {
@@ -40,6 +48,14 @@ package object saxon {
      * Minimal toString (no indenting, no xml decl).
      */
     def toStr(implicit saxonContext: SaxonContext) = saxonContext.serializer.serializeNodeToString(xdmNode)
+
+    def deepEqual(other: XdmNode)(implicit saxonContext: SaxonContext): Boolean = {
+      //implicit val someNSs = NameSpaces("saxon" -> "http://saxon.sf.net/")
+      //val testEq = XPath("saxon:deep-equal($a, $b, (), '?')")
+      val testEq = XPath("deep-equal($a, $b)")
+      val answer = testEq(xdmNode, "a" -> xdmNode, "b" -> other)
+      answer.head.getStringValue == "true"
+    }
   }
 
   implicit class SaxonXMLItem(xdmItem: XdmItem) {
@@ -51,6 +67,20 @@ package object saxon {
         xdmItem.getStringValue
       else
         saxonContext.serializer.serializeNodeToString(xdmItem.asInstanceOf[XdmNode])
+  }
+
+  implicit class SaxonXMLXdmItemTraversable(trav: Traversable[XdmItem]) {
+    def as[T](implicit c: Convert[Traversable[XdmItem], T]) = c.convert(trav)
+  }
+
+  implicit val traversableToString = new Convert[Traversable[XdmItem], String] {
+    override def convert(a: Traversable[XdmItem]): String = a.map(_.getStringValue).mkString
+  }
+  implicit val traversableToInt = new Convert[Traversable[XdmItem], Int] {
+    override def convert(a: Traversable[XdmItem]): Int = a.head.getStringValue.toInt
+  }
+  implicit val traversableToXdmNode = new Convert[Traversable[XdmItem], XdmNode] {
+    override def convert(a: Traversable[XdmItem]): XdmNode = a.head.asInstanceOf[XdmNode]
   }
 
 }

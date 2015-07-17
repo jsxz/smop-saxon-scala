@@ -9,23 +9,24 @@ class XPath(stringForm: String)(implicit saxonContext: SaxonContext, nss: NameSp
     case (prefix, uri) => xpathCompiler.declareNamespace(prefix, uri)
   }
 
-  def apply(node:XdmNode, vars: (String, XdmItem)*): Traversable[XdmItem] = {
-    apply(node, vars.toMap)
+  def apply(contextItem: XpathQueryable, vars: (String, XdmItem)*): Traversable[XdmItem] = {
+    apply(contextItem, vars.toMap)
   }
 
-  def apply(node: XdmNode, vars: Map[String, XdmItem] = Map.empty): Traversable[XdmItem] = {
+  def apply(contextItem: XpathQueryable, vars: Map[String, XdmItem] = Map.empty): Traversable[XdmItem] = {
     vars.foreach {
       case (name, value) => xpathCompiler.declareVariable(new QName(name))
     }
     val executable = xpathCompiler.compile(stringForm)
     val selector = executable.load
-    selector.setContextItem(node)
+    selector.setContextItem(contextItem.xdmItem)
     vars.foreach {
       case (name, value) => selector.setVariable(new QName(name), value)
     }
 
-    selector.iterator().asScala.toTraversable
+    selector.evaluate().iterator().asScala.toTraversable
   }
+
 }
 
 object XPath {

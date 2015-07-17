@@ -1,3 +1,4 @@
+import net.sf.saxon.s9api.SaxonApiException
 import org.specs2.mutable._
 import org.smop.saxon._
 
@@ -7,6 +8,9 @@ class SaxonSpec extends Specification {
     "parse XML" in {
       val node = xml"""<foo bar="baz"/>"""
       node.toStr === """<foo bar="baz"/>"""
+    }
+    "bomb on ill-formed xml" in {
+      xml"<foo></bar>" should throwA[SaxonApiException]
     }
     "interpolate" in {
       val i = 5
