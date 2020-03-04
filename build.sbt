@@ -8,7 +8,7 @@ licenses += ("BSD Simplified", url("http://opensource.org/licenses/bsd-license")
 
 scalaVersion := "2.13.1"
 
-crossScalaVersions := Seq("2.13.1", "2.12.4", "2.11.4", "2.10.4")
+crossScalaVersions := Seq("2.13.1", "2.12.4", "2.11.4")
 
 incOptions := incOptions.value.withNameHashing(true)
 
