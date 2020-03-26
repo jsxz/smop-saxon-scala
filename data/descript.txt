@@ -177,4 +177,3 @@ entryElemType,para,warning,caution,note,legend
 tfootElemType,colspec,row
 tbodyElemType,row
 levelledParaAltsElemType,levelledPara
-
